@@ -11,6 +11,10 @@ func main()  {
 	log.Fatal(http.ListenAndServe("localhost:9999", nil))
 }
 
+// 思考  这里 (http.ListenAndServe("localhost:9999", nil) 传进去的 nil 最后变成了什么？
+// 可以去找 defaultServerMux
+// 这里后续也会更新在博客中  请关注  CSDN wx-zhou 嘻嘻
+
 
 // 最基础的功能展示， 这里函数携带的参数是根据http库里面定义的
 func sayHello(w http.ResponseWriter, r *http.Request){
