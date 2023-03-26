@@ -1,34 +1,23 @@
 package xiawuyue_base3
 
 import (
-	"fmt"
 	"net/http"
 )
 
-/*
-本地包用法：
-require xiawuyue v0.0.0
-
-replace xiawuyue => ./base2/xiawuyue
-*/
-
 type XiaWuYue struct {
-	router map[string]HandleFunc
+	router *router
 }
 
 // New 直接调用New方法构建对象
 func New() *XiaWuYue {
-	return &XiaWuYue{ router: make(map[string]HandleFunc) }
+	return &XiaWuYue{ router: newRouter() }
 }
 
 // HandleFunc 简单定义一类函数  这就是后续具体的处理方法的类型
-type HandleFunc func(w http.ResponseWriter, req *http.Request)
+type HandleFunc func(c *Context)
 
 func (x *XiaWuYue)addRoute(method string, pattern string, handleFunc HandleFunc) {
-	// 其中method 是用来区分 get post 等方法的
-	// patter 是提到的 muxEntry 中的匹配字符串 也就是具体的路径
-	key := method + "-" + pattern
-	x.router[key] = handleFunc
+	x.router.addRoute(method, pattern, handleFunc)
 }
 
 func (x *XiaWuYue) Get(pattern string, handleFunc HandleFunc) {
@@ -47,17 +36,14 @@ func (x *XiaWuYue) Delete(pattern string, handleFunc HandleFunc) {
 	x.addRoute("DELETE", pattern, handleFunc)
 }
 
+// Run 这里将run函数独立出来，后面我们就不用再使用http包进行跑服务了  直接用xiawuyue.run就好了
+func (x *XiaWuYue) Run(addr string) {
+	http.ListenAndServe(addr, x)
+}
+
+// 这里因为我们新建了context 所以我们只需要将context传给我们抽离出来的router使用就好了
+
 func (x *XiaWuYue) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	switch req.URL.Path {
-	case "/":
-		fmt.Println("你访问的是根路径")
-		w.Write([]byte("hello world"))
-		// 这里会导致只在终端打印  所以要修改逻辑
-	}
-
-	key := req.Method + "-" + req.URL.Path
-	if handler, ok := x.router[key]; ok {
-		handler(w, req)
-	}
-
+	c := NewContext(w, req)
+	x.router.handle(c)
 }
