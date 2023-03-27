@@ -1,5 +1,7 @@
 package trie
 
+
+// 思想有点类似查找树
 type Trie struct {
 	nest  [26]*Trie
 	isEnd bool
