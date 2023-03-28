@@ -23,6 +23,24 @@ func (n *node) matchChild(part string) *node {
 	return nil
 }
 
+// 根据理解重新写的个人逻辑
+//func (t *node) matchChild(part string) *node {
+//
+//	// 先搜寻精确匹配路由
+//	for _, child := range t.children{
+//		if child.part == part && !child.isWild {
+//			return child
+//		}
+//	}
+//	// 再搜寻模糊匹配路由
+//	for _, child := range t.children{
+//		if child.part == part && child.isWild {
+//			return child
+//		}
+//	}
+//
+//	return nil
+//}
 
 func (n *node) insert(pattern string, parts []string, height int) {
 	//fmt.Println(n)
