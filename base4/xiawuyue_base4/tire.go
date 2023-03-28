@@ -1,5 +1,7 @@
 package xiawuyue_base3
 
+import "fmt"
+
 // 简单描述下动态路由的背景
 // 我们用 map[string]HandleFunc 的形式虽然很方便
 // 检索效率也高，但是有一个致命的缺点：
@@ -70,3 +72,24 @@ func (t *Tire) MatchChild(part string) *Tire {
 	return nil
 }
 
+// insert 要实现的功能
+// 1、 插入子节点，如果路径上没有相应的子节点我们就要一起插入
+// 2、 在最后讲这个节点插入的时候要更新它的 pattern
+// 3、 当插入到最后发现插入的这个 pattern 已经存在了的时候，我们要及时告知并返回报错  防止用户有两个逻辑要实现，最后写成了一个url
+// 嘻嘻  3 就是我们自己的创新点，感谢 geektutu 和 b站up的视频
+
+// insert desc
+func (t *Tire) insert(pattern string, parts []string, depth int) error {
+	if len(parts) == depth {
+		if t.pattern != "" {
+			if t.pattern == pattern {
+				return fmt.Errorf("pattern: %s is exist. please check and update ~", pattern)
+			}
+		}
+		t.pattern = pattern
+		return nil
+	}
+
+
+	return nil
+}
