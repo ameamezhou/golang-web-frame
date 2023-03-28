@@ -50,26 +50,17 @@ func (n *node) matchChild(part string) *node {
 我在 /qi 的字节点下面匹配到 /:xia or / * 的时候 就会获取到这个子节点并且往下传递， 就等于说我的 /wu /yue 这两个子节点就会加到 /:xia
 或者 / * 的下面了  这是我们不希望看到的情况，所以为了避免这个情况  这里我把逻辑进行了修改
 作者的原思想我把它汇总成代码写到了 base4/test1 写了一个测试用例，作者的动态路由存在吞噬路由的可能性
-
-
 */
-
-func startWith(part string) bool {
-	if part[0] == 58{
-		return true
-	}
-	return false
-}
-
 
 func (t *Tire) MatchChild(part string) *Tire {
 
+	// 先搜寻精确匹配路由
 	for _, child := range t.children{
 		if child.part == part && !child.isWild {
 			return child
 		}
 	}
-
+	// 再搜寻模糊匹配路由
 	for _, child := range t.children{
 		if child.part == part && child.isWild {
 			return child
