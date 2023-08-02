@@ -12,13 +12,18 @@ import (
 // Path 路径
 // Method 用的方法
 
+// 我们在HandlerFunc 中  希望能够访问刀解析的参数，（上下文管理） 所以我们需要用Context 增加一个属性存储Params
 // Context desc
 type Context struct {
+	// http info
 	Writer		http.ResponseWriter
 	Req     	*http.Request
-	StatusCode 	int
+	// request info
 	Path 		string
 	Method      string
+	Params		map[string]string
+	// response info
+	StatusCode 	int
 }
 
 type Z map[string]interface{}
@@ -98,4 +103,9 @@ func (c *Context) HTML(status int, html string) {
 func (c *Context) Data(status int, data []byte)  {
 	c.Status(status)
 	c.Writer.Write(data)
+}
+
+func (c *Context) Param(key string) string {
+	value, _ := c.Params[key]
+	return value
 }
