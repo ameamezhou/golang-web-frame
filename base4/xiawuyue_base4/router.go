@@ -1,6 +1,8 @@
 package xiawuyue_base3
 
-import "strings"
+import (
+	"strings"
+)
 
 // 将router 从 xiawuyue 主体里抽离出来
 // roots key eg, roots['GET'] roots['POST']
@@ -86,7 +88,7 @@ func (r *router) handle(c *Context) {
 	t, params := r.getRoute(c.Method, c.Path)
 	if t != nil {
 		c.Params = params
-		key := c.Method + "-" + c.Path
+		key := c.Method + "-" + t.pattern
 		if handler, ok := r.handlers[key]; ok {
 			handler(c)
 		}
