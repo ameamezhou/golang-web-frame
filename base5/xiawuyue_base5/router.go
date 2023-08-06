@@ -11,13 +11,13 @@ import (
 // handlers 记录 方法 - 路径   来标注处理函数
 type router struct {
 	roots	 map[string]*Tire
-	handlers map[string]HandleFunc
+	handlers map[string]HandlerFunc
 }
 
 func newRouter() *router {
 	return &router{
 		roots:		make(map[string]*Tire),
-		handlers: 	make(map[string]HandleFunc),
+		handlers: 	make(map[string]HandlerFunc),
 	}
 }
 
@@ -38,7 +38,7 @@ func parsePattern(pattern string)[]string {
 	return parts
 }
 
-func (r *router)addRoute(method string, pattern string, handleFunc HandleFunc) {
+func (r *router)addRoute(method string, pattern string, handleFunc HandlerFunc) {
 	// 其中method 是用来区分 get post 等方法的
 	// patter 是提到的 muxEntry 中的匹配字符串 也就是具体的路径
 	parts := parsePattern(pattern)
