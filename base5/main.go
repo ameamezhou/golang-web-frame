@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	xiawuyue "xiawuyue/base5/xiawuyue_base5"
 )
 
 func main(){
 	x := xiawuyue.New()
+	fmt.Println()
 	x.Get("/test", func(c *xiawuyue.Context) {
 		c.HTML(http.StatusOK, "<h1>test Page</h1>")
 	})
@@ -26,7 +28,7 @@ func main(){
 			// expect /hello/geektutu
 			c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
 		})
-		gTwo.Post("/login", func(c *xiawuyue.Context) {
+		gTwo.Get("/login", func(c *xiawuyue.Context) {
 			c.Json(http.StatusOK, xiawuyue.Z{
 				"username": c.PostForm("username"),
 				"password": c.PostForm("password"),

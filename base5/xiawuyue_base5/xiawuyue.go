@@ -42,7 +42,7 @@ func New() *XiaWuYue {
 	qiuWu.RouterGroup = &RouterGroup{ engine: qiuWu }
 	qiuWu.groups = []*RouterGroup{ qiuWu.RouterGroup }
 
-	return &XiaWuYue{ router: newRouter() }
+	return qiuWu
 }
 
 // Group is defined to create a new RouterGroup
