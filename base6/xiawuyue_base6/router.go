@@ -1,6 +1,7 @@
 package xiawuyue_base6
 
 import (
+	"net/http"
 	"strings"
 )
 
@@ -89,10 +90,12 @@ func (r *router) handle(c *Context) {
 	if t != nil {
 		c.Params = params
 		key := c.Method + "-" + t.pattern
-		if handler, ok := r.handlers[key]; ok {
-			handler(c)
-		}
+		c.handlers = append(c.handlers, r.handlers[key])
+	} else {
+		c.handlers = append(c.handlers, func(c *Context) {
+			c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		})
 	}
 
-
+	c.Next()
 }

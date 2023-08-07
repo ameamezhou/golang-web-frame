@@ -3,6 +3,7 @@ package xiawuyue_base6
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 
@@ -58,6 +59,10 @@ func (group *RouterGroup) Group(prefix string) *RouterGroup {
 	return newGroup
 }
 
+func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
+	g.middlewares = append(g.middlewares, middlewares...)
+}
+
 // HandlerFunc 简单定义一类函数  这就是后续具体的处理方法的类型
 type HandlerFunc func(c *Context)
 
@@ -91,6 +96,13 @@ func (x *XiaWuYue) Run(addr string) {
 // 这里因为我们新建了context 所以我们只需要将context传给我们抽离出来的router使用就好了
 
 func (x *XiaWuYue) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	var middlewares []HandlerFunc
+	for _, group := range x.groups {
+		if strings.HasPrefix(req.URL.Path, group.prefix) {
+			middlewares = append(middlewares, group.middlewares...)
+		}
+	}
 	c := NewContext(w, req)
+	c.handlers = middlewares
 	x.router.handle(c)
 }
