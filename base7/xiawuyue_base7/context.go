@@ -6,13 +6,7 @@ import (
 	"net/http"
 )
 
-// this context struct 我们需要包含两个所需变量
-// 一个是我们需要写的 Writer 一个是请求 Request
-// StatusCode 状态码
-// Path 路径
-// Method 用的方法
-
-// 我们在HandlerFunc 中  希望能够访问刀解析的参数，（上下文管理） 所以我们需要用Context 增加一个属性存储Params
+// 接下来，对原来的 (*Context).HTML()方法做了些小修改，使之支持根据模板文件名选择模板进行渲染
 // Context desc
 type Context struct {
 	// http info
@@ -27,6 +21,8 @@ type Context struct {
 	// middle ware
 	handlers 	[]HandlerFunc
 	index 		int
+	// engine pointer
+	xiawuyue 	*XiaWuYue
 }
 
 type Z map[string]interface{}
@@ -106,10 +102,17 @@ func (c *Context) Json(status int, obj interface{}) {
 	}
 }
 
-func (c *Context) HTML(status int, html string) {
-	c.Status(status)
+func (c *Context) Fail (status int, err string) {
+	c.SetHeader("Content-Type", "application/json")
+	http.Error(c.Writer, err, status)
+}
+
+func (c *Context) HTML(status int, name string, data interface{}) {
 	c.SetHeader("Content-Type", "text/html")
-	c.Writer.Write([]byte(html))
+	c.Status(status)
+	if err := c.xiawuyue.htmlTemplates.ExecuteTemplate(c.Writer, name, data); err != nil {
+		c.Fail(500, err.Error())
+	}
 }
 
 func (c *Context) Data(status int, data []byte)  {

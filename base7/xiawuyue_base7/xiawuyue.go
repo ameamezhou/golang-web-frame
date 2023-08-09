@@ -1,6 +1,7 @@
 package xiawuyue_base7
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"path"
@@ -18,6 +19,8 @@ type  XiaWuYue struct {
 	*RouterGroup
 	router 	*router
 	groups	[]*RouterGroup
+	htmlTemplates *template.Template // for html render
+	funcMap       template.FuncMap   // for html render
 }
 
 // New 直接调用New方法构建对象
@@ -27,6 +30,20 @@ func New() *XiaWuYue {
 	qiuWu.groups = []*RouterGroup{ qiuWu.RouterGroup }
 
 	return qiuWu
+}
+
+/*
+首先为 Engine 示例添加了 *template.Template 和 template.FuncMap对象，前者将所有的模板加载进内存，后者是所有的自定义模板渲染函数。
+
+另外，给用户分别提供了设置自定义渲染函数funcMap和加载模板的方法。
+*/
+
+func (x *XiaWuYue) SetFuncMap(funcMap template.FuncMap) {
+	x.funcMap = funcMap
+}
+
+func (x *XiaWuYue) LoadHTMLGlob(pattern string) {
+	x.htmlTemplates = template.Must(template.New("").Funcs(x.funcMap).ParseGlob(pattern))
 }
 
 // Group is defined to create a new RouterGroup
@@ -95,6 +112,11 @@ func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSyste
 // serve static files
 func (g *RouterGroup) Static(relativePath string, root string) {
 	handler := g.createStaticHandler(relativePath, http.Dir(root))
+	/*
+	之前还奇怪为什么要写
+	handler := group.createStaticHandler(relativePath, http.Dir(root)) urlPattern := path.Join(relativePath, "/*filepath")
+	后来才发现原来fileHandler.ServeHTTP 会把req.url.path 作为文件路径
+	*/
 	urlPattern := path.Join(relativePath, "/*filepath")
 	g.Get(urlPattern, handler)
 }
@@ -108,5 +130,6 @@ func (x *XiaWuYue) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	c := NewContext(w, req)
 	c.handlers = middlewares
+	c.xiawuyue = x
 	x.router.handle(c)
 }
