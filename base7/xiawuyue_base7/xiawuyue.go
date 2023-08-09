@@ -3,25 +3,9 @@ package xiawuyue_base7
 import (
 	"log"
 	"net/http"
+	"path"
 	"strings"
 )
-
-
-/*
-我们理想的调用 Group 的方式是
-r := gee.New()
-v1 := r.Group("/v1")
-v1.GET("/", func(c *gee.Context) {
-	c.HTML(http.StatusOK, "<h1>Hello Gee</h1>")
-})
-拿到一个group 并在这个 group 中进行添加后续的路由
-
-那么我们就要思考一个 Group 对象需要哪些属性
-首先我们要能够记录前缀，因为这个要记录前缀  我们补充后面内容
-我们还需要知道当前分组的父组件是谁
-web框架最重要的就是中间件，所以我们还要存中间件（其实也就是对应着一个预处理的函数）
-最后我们要用一个 (*Engine.addRoute()) 来映射所有的路由跪着和 Handler。
-*/
 
 type RouterGroup struct {
 	prefix		string
@@ -30,7 +14,6 @@ type RouterGroup struct {
 	engine		*XiaWuYue			// all groups share a Engine(XiaWuYue) instance
 }
 
-// XiaWuYue 这里我们将Engine改为XiaWuYue
 type  XiaWuYue struct {
 	*RouterGroup
 	router 	*router
@@ -93,7 +76,21 @@ func (x *XiaWuYue) Run(addr string) {
 	http.ListenAndServe(addr, x)
 }
 
-// 这里因为我们新建了context 所以我们只需要将context传给我们抽离出来的router使用就好了
+// create static handler
+func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSystem) HandlerFunc {
+	absolutePath := path.Join(g.prefix, relativePath)
+	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
+	return func(c *Context) {
+		file := c.Param("filepath")
+		// Check if file exists and/or if we have permission to access it
+		if _, err := fs.Open(file); err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		fileServer.ServeHTTP(c.Writer, c.Req)
+	}
+}
 
 func (x *XiaWuYue) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var middlewares []HandlerFunc
