@@ -92,6 +92,13 @@ func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSyste
 	}
 }
 
+// serve static files
+func (g *RouterGroup) Static(relativePath string, root string) {
+	handler := g.createStaticHandler(relativePath, http.Dir(root))
+	urlPattern := path.Join(relativePath, "/*filepath")
+	g.Get(urlPattern, handler)
+}
+
 func (x *XiaWuYue) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var middlewares []HandlerFunc
 	for _, group := range x.groups {
