@@ -32,6 +32,13 @@ func New() *XiaWuYue {
 	return qiuWu
 }
 
+// Default use Logger() & Recovery middlewares
+func Default() *XiaWuYue {
+	yunWuYue := New()
+	yunWuYue.Use(Logger(), Recovery())
+	return yunWuYue
+}
+
 /*
 首先为 Engine 示例添加了 *template.Template 和 template.FuncMap对象，前者将所有的模板加载进内存，后者是所有的自定义模板渲染函数。
 
